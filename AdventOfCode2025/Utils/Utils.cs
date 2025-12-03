@@ -1,0 +1,174 @@
+﻿namespace AdventOfCode2024;
+
+public static class Utils
+{
+    public static void PrintMatrix<T>(this T[][] matrix)
+    {
+        Console.WriteLine("------------------------------");
+        for (int i = 0; i < matrix.Length; i++)
+        {
+            Console.WriteLine();
+            for (int j = 0; j < matrix[i].Length; j++)
+            {
+                Console.Write(matrix[i][j]);
+            }
+        }
+    }
+
+    public static bool IsOutOfBounds<T>(this T[][] matrix, int i, int j)
+    {
+        return i < 0 || i >= matrix.Length || j < 0 || j >= matrix[i].Length;
+    }
+
+    public static IDictionary<Vertex, long> Dijkstra(this ISet<Vertex> vertices, Vertex start, Vertex end)
+    {
+        var finalDistances = vertices.ToDictionary(v => v, v => (long)-1); // -1 represent unreachable vertex
+        var visited = new HashSet<Vertex> { start };
+        var frontierVertices = start.Adjacency.ToHashSet();
+        finalDistances[start] = 0;
+
+        while (!visited.Contains(end) && frontierVertices.Count > 0)
+        {
+            Explore(finalDistances, frontierVertices, visited);
+        }
+
+        return finalDistances;
+
+        static void Explore(Dictionary<Vertex, long> finalDistances, HashSet<Edge> frontierEdges, HashSet<Vertex> visited)
+        {
+            var minDist = long.MaxValue;
+            Edge? minEdge = null;
+            foreach (var edge in frontierEdges)
+            {
+                if (edge.Weight + finalDistances[edge.From] < minDist)
+                {
+                    minDist = edge.Weight + finalDistances[edge.From];
+                    minEdge = edge;
+                }
+            }
+
+            finalDistances[minEdge!.To] = minDist;
+
+            visited.Add(minEdge.To);
+            frontierEdges.UnionWith(minEdge.To.Adjacency);
+            frontierEdges.RemoveWhere(x => visited.Contains(x.To));
+        }
+    }
+
+    public static ISet<Vertex> GetVeticesFromMinPaths(IDictionary<Vertex, long> distances, Vertex start, Vertex end)
+    {
+        var vertices = new HashSet<Vertex> { end };
+
+        GetMinPath(end);
+
+        return vertices;
+
+        void GetMinPath(Vertex current)
+        {
+            if (current == start) return;
+
+            var candidates = distances.Keys.Where(v => v.IsAdjacentTo(current)).ToHashSet();
+
+            foreach (var candidate in candidates)
+            {
+                if (distances[candidate] + candidate.Adjacency.Single(e => e.To == current).Weight == distances[current])
+                {
+                    vertices.Add(candidate);
+                    GetMinPath(candidate);
+                }
+            }
+        }
+    }
+
+    public static IDictionary<Vertex, long> DijkstraWithPrevious(
+        this ISet<Vertex> vertices,
+        Vertex start,
+        Vertex end,
+        out IDictionary<Vertex, Vertex> previousVertex)
+    {
+        var finalDistances = vertices.ToDictionary(v => v, v => (long)-1); // -1 represent unreachable vertex
+        var visited = new HashSet<Vertex> { start };
+        var frontierVertices = start.Adjacency.ToHashSet();
+        finalDistances[start] = 0;
+
+        previousVertex = new Dictionary<Vertex, Vertex>();
+
+        while (!visited.Contains(end) && frontierVertices.Count > 0)
+        {
+            Explore(finalDistances, frontierVertices, visited, previousVertex);
+        }
+
+        return finalDistances;
+
+        static void Explore(
+            Dictionary<Vertex, long> finalDistances,
+            HashSet<Edge> frontierEdges,
+            HashSet<Vertex> visited,
+            IDictionary<Vertex, Vertex> previousVertex)
+        {
+            var minDist = long.MaxValue;
+            Edge? minEdge = null;
+            foreach (var edge in frontierEdges)
+            {
+                if (edge.Weight + finalDistances[edge.From] < minDist)
+                {
+                    minDist = edge.Weight + finalDistances[edge.From];
+                    minEdge = edge;
+                }
+            }
+
+            finalDistances[minEdge!.To] = minDist;
+
+            visited.Add(minEdge.To);
+            previousVertex.Add(minEdge.To, minEdge.From);
+            frontierEdges.UnionWith(minEdge.To.Adjacency);
+            frontierEdges.RemoveWhere(x => visited.Contains(x.To));
+        }
+    }
+}
+
+
+
+
+
+public class Vertex(int I = 0, int J = 0, Direction Direction = Direction.Irrelevant, string name = "") : IEquatable<Vertex>
+{
+    public ISet<Edge> Adjacency { get; } = new HashSet<Edge>();
+    public int I { get; } = I;
+    public int J { get; } = J;
+    public Direction Direction { get; } = Direction;
+    public string Name { get; } = name;
+
+    public int Degree => Adjacency.Count;
+    public ISet<Vertex> AdjacencySet => Adjacency.Select(e => e.To).ToHashSet();
+
+    public ISet<Vertex> GetInducedAdjacency(ISet<Vertex> induced) => AdjacencySet.Where(induced.Contains).ToHashSet();
+    public int GetInducedDegree(ISet<Vertex> induced) => GetInducedAdjacency(induced).Count;
+
+    public bool IsAdjacentTo(Vertex other)
+    {
+        return Adjacency.Any(e => e.To == other);
+    }
+
+    public bool Equals(Vertex? other)
+    {
+        return other is Vertex v && v.I == I && v.J == J && v.Direction == Direction && v.Name == Name;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as Vertex);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(I, J, Direction, Name);
+    }
+
+    public static bool operator ==(Vertex current, Vertex other) => current.Equals(other);
+    public static bool operator !=(Vertex current, Vertex other) => !(current == other);
+}
+
+public record Edge(Vertex From, Vertex To, long Weight = 1);
+
+public enum Direction { Vertical, Horizontal, Irrelevant }
