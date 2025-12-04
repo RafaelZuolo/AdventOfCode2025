@@ -6,14 +6,32 @@ namespace AdventOfCode2025Tests;
 
 public class Day01Tests
 {
+    const string input =
+@"L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82
+";
+
     [Fact]
-    public void SolvePart1_Test()
+    public void Day01SolvePart1()
     {
-        var foo = 0;
+        var answer = new Day01().SolvePart1(input);
 
-        var boo = new Day01();
+        answer.Should().Be("3");
+    }
 
-        boo.Invoking(b => b.SolvePart1("")).Should().Throw<NotImplementedException>();
-        foo.Should().Be(0);
+    [Fact]
+    public void Day01SolvePart2()
+    {
+        var answer = new Day01().SolvePart2(input);
+
+        answer.Should().Be("6");
     }
 }

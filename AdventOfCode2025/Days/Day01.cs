@@ -11,18 +11,17 @@ public class Day01 : IDay
         var zeroes = (long)0;
         var currentVal = 50;
 
-
         foreach (var item in parsedInput)
         {
             if (item[0] == 'R')
             {
                 currentVal += int.Parse(item.Substring(1, item.Length - 1));
-                currentVal = currentVal % 100;
+                currentVal %= 100;
             }
             if (item[0] == 'L')
             {
                 currentVal += 100 - int.Parse(item.Substring(1, item.Length - 1));
-                currentVal = currentVal % 100;
+                currentVal %= 100;
             }
 
             if (currentVal == 0)
