@@ -30,22 +30,34 @@ public class MinPQTests
         item.Should().Be(input);
     }
 
-    [Theory]
-    [InlineData("foo", 2, "faa", 1)]
-    public void DelMin_TwoSingleItemAdded_ReturnItemWithLowerPriority(
-        string firstItem,
-        long firstPriority,
-        string secondItem,
-        long secondPriority)
+    [Fact]
+    public void DelMin_TwoSingleItemAdded_ReturnItemWithLowerPriority()
     {
+        var minItem = "foo";
         var pq = new MinHeap<string>();
-
-        pq.Insert(firstItem, firstPriority);
-        pq.Insert(secondItem, secondPriority);
+        pq.Insert(minItem, 1);
+        pq.Insert("bar", 2);
 
         var item = pq.DelMin();
 
-        item.Should().Be(secondItem);
+        item.Should().Be(minItem);
+    }
+
+    [Fact]
+    public void DelMin_TwoSingleItemAddedAndDelMinTwoTimes_ReturnItemWithCurrentLowerPriority()
+    {
+        var firstReturnInDelMin = "foo";
+        var secondReturnInDelMin = "bar";
+        var pq = new MinHeap<string>();
+        pq.Insert(secondReturnInDelMin, 2);
+        pq.Insert(firstReturnInDelMin, 1);
+
+        var item = pq.DelMin();
+
+        item.Should().Be(firstReturnInDelMin);
+
+        item = pq.DelMin();
+        item.Should().Be(secondReturnInDelMin);
     }
 
     [Fact]

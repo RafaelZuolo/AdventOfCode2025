@@ -6,9 +6,9 @@ public class AStartSearch<T> where T : IEquatable<T>
     private readonly T start;
     private readonly Func<T, T, long> heuristic;
 
-    private MinHeap<T> frontier;
-    private Dictionary<T, long> currentCost;
-    private Dictionary<T, long> currentGuess;
+    private MinHeap<T> frontier = new();
+    private Dictionary<T, long> currentCost = [];
+    private Dictionary<T, long> currentGuess = [];
     private Dictionary<T, T> previousVertex = new();
 
     public AStartSearch(Digraph<T> digraph, T start, Func<T, T, long>? heuristic = null)
@@ -30,7 +30,7 @@ public class AStartSearch<T> where T : IEquatable<T>
 
         currentGuess = new()
         {
-            { start, this.heuristic(start, start) }
+            { start, heuristic(start, start) }
         };
 
         var last = start;
@@ -42,16 +42,19 @@ public class AStartSearch<T> where T : IEquatable<T>
 
             foreach (var neighbor in digraph.GetNeighborsOf(current))
             {
-                if (!currentCost.ContainsKey(neighbor.To))
+                if (!currentCost.TryGetValue(neighbor.To, out var value))
                 {
-                    currentCost.Add(neighbor.To, currentCost[current] + neighbor.Weight);
+                    value = currentCost[current] + neighbor.Weight;
+                    currentCost.Add(neighbor.To, value);
+                    frontier.Insert(neighbor.To, value + heuristic(start, neighbor.To));
                     continue;
                 }
 
                 var tentativeCost = currentCost[current] + neighbor.Weight;
-                if (tentativeCost < currentCost[neighbor.To])
+                if (tentativeCost < value)
                 {
-
+                    currentCost[neighbor.To] = tentativeCost;
+                    frontier.Upsert(neighbor.To, tentativeCost + heuristic(start, neighbor.To));
                 }
             }
         }

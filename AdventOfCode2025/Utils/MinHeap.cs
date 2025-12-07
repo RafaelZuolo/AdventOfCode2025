@@ -36,15 +36,15 @@ public class MinHeap<T> where T : IEquatable<T>
     {
         var min = pq[1]!.Item;
         Swap(1, pq.Count - 1);
-        Sink(1);
         pq.RemoveAt(pq.Count - 1);
+        Sink(1);
 
         return min;
     }
 
     private void Swap(int i, int j)
     {
-        (indexes[pq[j].Item], indexes[pq[i].Item]) = (indexes[pq[i].Item], indexes[pq[j].Item]);
+        (indexes[pq[j]!.Item], indexes[pq[i]!.Item]) = (indexes[pq[i]!.Item], indexes[pq[j]!.Item]);
         (pq[j], pq[i]) = (pq[i], pq[j]);
     }
 
@@ -92,6 +92,18 @@ public class MinHeap<T> where T : IEquatable<T>
             Sink(indexes[item]);
         }
         else throw new InvalidOperationException("failed to update: item not found");
+    }
+
+    internal void Upsert(T item, long priority)
+    {
+        if (indexes.ContainsKey(item))
+        {
+            Update(item, priority);
+        }
+        else
+        {
+            Insert(item, priority);
+        }
     }
 
     private record HeapItem(T Item, long Priority);

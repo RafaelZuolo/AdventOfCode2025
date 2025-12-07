@@ -21,6 +21,8 @@ public class Digraph<T> where T : IEquatable<T>
 
     public Digraph<T> AddEdge(T from, T to, long weight = 1)
     {
+        vertices.Add(from);
+        vertices.Add(to);
         if (adjacencies.TryGetValue(from, out var adjacency))
         {
             adjacency.Add(new Edge<T>(to, weight));
