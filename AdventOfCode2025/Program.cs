@@ -10,7 +10,7 @@ Dictionary<int, IDay> DayByNumber = new Dictionary<int, IDay>
     { 05, new Day05() },
     { 06, new Day06() },
     { 07, new Day07() },
-    //{ 08, new Day08() },
+    { 08, new Day08() },
     //{ 09, new Day09() },
     //{ 10, new Day10() },
     //{ 11, new Day11() },
@@ -21,7 +21,7 @@ var DebugDay = DayByNumber.Last().Key;
 const string InputFolder = "Inputs";
 
 var projectPath = Directory.GetCurrentDirectory();
-var currentDay = args.Contains("-d") ? int.Parse(args[Array.IndexOf(args, "-d") + 1]) : DebugDay;
+var currentDay = args.Contains("-parent") ? int.Parse(args[Array.IndexOf(args, "-parent") + 1]) : DebugDay;
 var onlyPart1 = args.Contains("-p1");
 var onlyPart2 = !onlyPart1 && args.Contains("-p2");
 Console.WriteLine();

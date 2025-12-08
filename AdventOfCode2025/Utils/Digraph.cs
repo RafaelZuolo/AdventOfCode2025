@@ -39,6 +39,27 @@ public class Digraph<T> where T : IEquatable<T>
     {
         return adjacencies.GetValueOrDefault(vertex) ?? [];
     }
+
+    public ICollection<Edge<T>> GetAllEdges()
+    {
+        var edges = new HashSet<Edge<T>>();
+        foreach (var vertex in vertices)
+        {
+            edges.UnionWith(GetNeighborsOf(vertex));
+        }
+
+        return edges;
+    }
 }
 
-public record Edge<T>(T To, long Weight = 1) where T : IEquatable<T>;
+public record Edge<T>(T To, long Weight = 1) : IComparable<Edge<T>> where T : IEquatable<T>
+{
+    public int CompareTo(Edge<T>? other)
+    {
+        if (other is null) return 1;
+
+        if (Weight == other.Weight) return 0;
+
+        return Weight < other.Weight ? -1 : 1;
+    }
+}
