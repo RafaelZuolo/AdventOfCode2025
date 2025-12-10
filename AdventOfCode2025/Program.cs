@@ -12,7 +12,7 @@ Dictionary<int, IDay> DayByNumber = new Dictionary<int, IDay>
     { 07, new Day07() },
     { 08, new Day08() },
     { 09, new Day09() },
-    //{ 10, new Day10() },
+    { 10, new Day10() },
     //{ 11, new Day11() },
     //{ 12, new Day12() },
 };
@@ -34,5 +34,17 @@ var path = Path.Combine(projectPath, InputFolder, currentDay.ToString("D2") + ".
 var input = File.ReadAllText(path);
 
 var problemDay = DayByNumber[currentDay];
-if (!onlyPart2) Console.WriteLine($"Part 1: {problemDay.SolvePart1(input)}");
-if (!onlyPart1) Console.WriteLine($"Part 2: {problemDay.SolvePart2(input)}");
+if (!onlyPart2)
+{
+    var watch = System.Diagnostics.Stopwatch.StartNew();
+    Console.WriteLine($"Part 1: {problemDay.SolvePart1(input)}");
+    watch.Stop();
+    Console.WriteLine($"Elapsed Time: {watch.Elapsed}{Environment.NewLine}");
+}
+if (!onlyPart1)
+{
+    var watch = System.Diagnostics.Stopwatch.StartNew();
+    Console.WriteLine($"Part 2: {problemDay.SolvePart2(input)}");
+    watch.Stop();
+    Console.WriteLine($"Elapsed Time: {watch.Elapsed}");
+}
