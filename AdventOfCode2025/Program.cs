@@ -14,7 +14,7 @@ Dictionary<int, IDay> DayByNumber = new Dictionary<int, IDay>
     { 09, new Day09() },
     { 10, new Day10() },
     { 11, new Day11() },
-    //{ 12, new Day12() },
+    { 12, new Day12() },
 };
 
 var DebugDay = DayByNumber.Last().Key;
