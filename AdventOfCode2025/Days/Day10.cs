@@ -1,4 +1,5 @@
 ﻿using AdventOfCode2025.Utils;
+using Microsoft.Z3;
 
 namespace AdventOfCode2025.Days;
 
@@ -6,7 +7,7 @@ public class Day10 : IDay
 {
     public string SolvePart1(string input)
     {
-        var lights = input.ParseLines()
+        var machines = input.ParseLines()
             .Select(l =>
             {
                 var parts = l.Split(' ');
@@ -27,14 +28,14 @@ public class Day10 : IDay
             })
             .ToArray();
 
-        return lights.Select(MinButtonsBFS).Sum().ToString();
+        return machines.Select(MinButtonsBFS).Sum().ToString();
     }
 
-    public class Machine(IReadOnlyList<bool> targetLightState, IList<int[]> buttons, ICollection<int> joltage)
+    public class Machine(IReadOnlyList<bool> targetLightState, IList<int[]> buttons, IList<int> joltage)
     {
         public IReadOnlyList<bool> TargetLightState { get; } = targetLightState;
         public IReadOnlyDictionary<int, int[]> Buttons { get; } = Enumerable.Range(0, buttons.Count).ToDictionary(k => k, i => buttons[i]);
-        public ICollection<int> Joltage { get; } = joltage;
+        public IList<int> Joltages { get; } = joltage;
     }
 
     public static int MinButtonsBFS(Machine machine)
@@ -101,6 +102,52 @@ public class Day10 : IDay
 
     public string SolvePart2(string input)
     {
-        return "foo";
+        var machines = input.ParseLines()
+            .Select(l =>
+            {
+                var parts = l.Split(' ');
+                var targetJoltage = parts[^1][1..^1].Split(',').Select(int.Parse).ToArray();
+                var buttons = new List<int[]>();
+                for (int i = 1; i < parts.Length - 1; i++)
+                {
+                    var button = parts[i][1..^1].Split(',').Select(int.Parse).ToArray();
+                    buttons.Add(button);
+                }
+
+                return new Machine([], buttons, targetJoltage);
+            })
+            .ToArray();
+
+        long presses = 0;
+        foreach (var machine in machines)
+        {
+            using Context ctx = new Context();
+            var optimzer = ctx.MkOptimize();
+
+            var buttonPressesVariables = Enumerable.Range(0, machine.Buttons.Count)
+                .Select(i => ctx.MkIntConst($"b_{i}"))
+                .ToArray();
+            foreach (var button in buttonPressesVariables)
+            {
+                optimzer.Add(ctx.MkGe(button, ctx.MkInt(0)));
+            }
+
+            for (int i = 0; i < machine.Joltages.Count; i++)
+            {
+                var buttonsOfJoltage = buttonPressesVariables.Where((_, j) => machine.Buttons[j].Contains(i)).ToArray();
+                var sum = ctx.MkAdd(buttonsOfJoltage);
+                optimzer.Add(ctx.MkEq(sum, ctx.MkInt(machine.Joltages[i])));
+            }
+
+            optimzer.MkMinimize(ctx.MkAdd(buttonPressesVariables));
+            optimzer.Check();
+
+            var model = optimzer.Model;
+            presses += buttonPressesVariables.Sum(b => ((IntNum)model.Evaluate(b, true)).Int64);
+
+            ctx.Dispose();
+        }
+
+        return presses.ToString();
     }
 }

@@ -13,7 +13,7 @@ Dictionary<int, IDay> DayByNumber = new Dictionary<int, IDay>
     { 08, new Day08() },
     { 09, new Day09() },
     { 10, new Day10() },
-    //{ 11, new Day11() },
+    { 11, new Day11() },
     //{ 12, new Day12() },
 };
 
